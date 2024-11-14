@@ -48,14 +48,11 @@ function fetchQuestions() {
       params: {
         difficulty: selectedDiff.value,
         category: selectedCategory.value,
-        limit: 5,
+        limit: 3,
       },
     })
     .then((response) => {
       questions.value = response.data;
-      const multiples = response.data.filter(
-        (question) => question.multiple_correct_answers == "true"
-      );
     })
     .catch((error) => {
       console.error(error);

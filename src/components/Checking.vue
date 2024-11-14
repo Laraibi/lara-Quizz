@@ -1,5 +1,10 @@
 <template>
-  <div>{{ score * 100 }}%</div>
+  <p
+    class="text-center text-bold"
+    style="font-weight: bold; font-size: large; font-size: 18px"
+  >
+    {{ (score * 100).toFixed(2) }}%
+  </p>
   <table class="table">
     <thead>
       <tr>
@@ -31,6 +36,8 @@
                     : 'bg-danger'
                 "
               >
+                <v-icon v-if="answer.question.correct_answers[`${id}_correct`] == 'true'" name="bi-check-square-fill" />
+                <v-icon v-else name="ri-close-line" />
                 {{ possibleAnswer }}
               </li>
             </ul>
@@ -43,6 +50,8 @@
                 style="color: white"
                 :class="answer.isCorrect ? 'bg-success' : 'bg-danger'"
               >
+                <v-icon v-if="answer.isCorrect" name="bi-check-square-fill" />
+                <v-icon v-else name="ri-close-line" />
                 {{ answer.question.answers[userAnswerKey] }}
               </li>
             </ul>
@@ -55,6 +64,7 @@
 
 <script setup>
 import { defineProps, computed } from "vue";
+
 const { checkedAnswers } = defineProps(["checkedAnswers"]);
 
 const score = computed(
