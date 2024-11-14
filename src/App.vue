@@ -2,6 +2,7 @@
 import { ref, onMounted } from "vue";
 import axios from "axios";
 import Question from "./components/Question.vue";
+import Checking from "./components/Checking.vue";
 const apiKey = import.meta.env.VITE_QUIZZ_API_KEY;
 const categories = ref([]);
 const questions = ref([]);
@@ -9,6 +10,7 @@ const questionToShow = ref(-1);
 const userAnswers = ref([]);
 const selectedCategory = ref("");
 const selectedDiff = ref("easy");
+const answersChekin = ref([]);
 
 function updateUserAnswers(questionID, answers, isChecked) {
   // Cache the index and multiple-correct answers status to reduce redundant operations
@@ -59,6 +61,7 @@ function fetchQuestions() {
       console.error(error);
     });
   userAnswers.value = [];
+  answersChekin.value = [];
   questionToShow.value = 0;
 }
 function fetchCategories() {
@@ -90,14 +93,14 @@ function checkAnswers() {
       if (JSON.stringify(trueAnswers) == JSON.stringify(userAnswerArray)) {
         results.push({
           id: question.id,
-          correct: true,
+          isCorrect: true,
           userAnswers: userAnswerArray,
           correctAnswer: trueAnswers,
         });
       } else {
         results.push({
           id: question.id,
-          correct: false,
+          isCorrect: false,
           userAnswers: userAnswerArray,
           correctAnswer: trueAnswers,
         });
@@ -111,7 +114,13 @@ function checkAnswers() {
       });
     }
   });
-  console.log(results);
+  answersChekin.value = results.map((result) => {
+    return {
+      ...result,
+      question: questions.value.find((question) => question.id == result.id),
+    };
+  });
+  console.log(answersChekin.value);
 }
 
 onMounted(() => {
@@ -186,9 +195,11 @@ onMounted(() => {
         </div>
       </div>
     </div>
-    <div class="questions"  v-if="questionToShow >= 0">
+    <div
+      class="questions"
+      v-if="questionToShow >= 0 && !answersChekin.length"
+    >
       <Question
-       
         :key="questions[questionToShow].id"
         :question="questions[questionToShow]"
         @userAnswer="updateUserAnswers"
@@ -205,11 +216,13 @@ onMounted(() => {
           >
             <div
               class="progress-bar progress-bar-striped progress-bar-animated"
-              :style="{width:`${((questionToShow+1)/questions.length)*100}%`}"
+              :style="{
+                width: `${((questionToShow + 1) / questions.length) * 100}%`,
+              }"
             ></div>
           </div>
           <div class="text-center">
-            {{ (questionToShow+1) }}/{{ questions.length }}
+            {{ questionToShow + 1 }}/{{ questions.length }}
           </div>
         </div>
         <div class="col-3">
@@ -223,6 +236,9 @@ onMounted(() => {
           </button>
         </div>
       </div>
+    </div>
+    <div class="results" v-if="answersChekin.length">
+      <Checking :checked-answers="answersChekin" />
     </div>
   </div>
 </template>
