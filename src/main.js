@@ -1,4 +1,6 @@
 // import './assets/main.css'
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/js/bootstrap.bundle.min.js'; // Optional if you need Bootstrap's JavaScript components
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
