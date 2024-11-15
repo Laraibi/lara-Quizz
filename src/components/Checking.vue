@@ -13,7 +13,7 @@
       </tr>
     </thead>
     <tbody>
-      <template v-for="answer in checkedAnswers" :key="answer.id">
+      <template v-for="answer in answersChekin" :key="answer.id">
         <tr>
           <td
             colspan="2"
@@ -36,7 +36,12 @@
                     : 'bg-danger'
                 "
               >
-                <v-icon v-if="answer.question.correct_answers[`${id}_correct`] == 'true'" name="bi-check-square-fill" />
+                <v-icon
+                  v-if="
+                    answer.question.correct_answers[`${id}_correct`] == 'true'
+                  "
+                  name="bi-check-square-fill"
+                />
                 <v-icon v-else name="ri-close-line" />
                 {{ possibleAnswer }}
               </li>
@@ -63,14 +68,17 @@
 </template>
 
 <script setup>
-import { defineProps, computed } from "vue";
+import { computed } from "vue";
+import { useQuizzStore } from "@/stores/quizz";
+import { storeToRefs } from "pinia";
 
-const { checkedAnswers } = defineProps(["checkedAnswers"]);
+const store = useQuizzStore();
+const { answersChekin } = storeToRefs(store);
 
 const score = computed(
   () =>
-    checkedAnswers.filter((answer) => answer.isCorrect).length /
-    checkedAnswers.length
+    answersChekin.value.filter((answer) => answer.isCorrect).length /
+    answersChekin.value.length
 );
 </script>
 

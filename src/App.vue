@@ -1,124 +1,23 @@
 <script setup>
 import { ref, onMounted } from "vue";
-import axios from "axios";
 import Question from "./components/Question.vue";
 import Checking from "./components/Checking.vue";
-const apiKey = import.meta.env.VITE_QUIZZ_API_KEY;
-const categories = ref([]);
-const questions = ref([]);
-const questionToShow = ref(-1);
-const userAnswers = ref([]);
-const selectedCategory = ref("");
-const selectedDiff = ref("easy");
-const answersChekin = ref([]);
+import { storeToRefs } from "pinia";
+import { useQuizzStore } from "@/stores/quizz";
 
-function updateUserAnswers(questionID, answers, isChecked) {
-  // Cache the index and multiple-correct answers status to reduce redundant operations
-  const indexIfExists = userAnswers.value.findIndex(
-    (element) => element.questionID === questionID
-  );
-  const question = questions.value.find((q) => q.id === questionID);
-  const isMultiple = question.multiple_correct_answers === "true";
+const store = useQuizzStore();
+const {
+  categories,
+  questions,
+  questionToShow,
+  selectedCategory,
+  selectedDiff,
+  answersChekin,
+} = storeToRefs(store);
 
-  // If the question doesn't exist in userAnswers
-  if (indexIfExists === -1) {
-    userAnswers.value.push({ questionID, answers: [answers] });
-  } else {
-    const currentAnswers = userAnswers.value[indexIfExists].answers;
-    if (isChecked) {
-      // Handle checked case based on single or multiple answers allowed
-      userAnswers.value[indexIfExists].answers = isMultiple
-        ? [...currentAnswers, answers]
-        : [answers];
-    } else {
-      // Handle unchecked case based on single or multiple answers allowed
-      userAnswers.value[indexIfExists].answers = isMultiple
-        ? currentAnswers.filter((element) => element !== answers)
-        : [];
-    }
-  }
-}
+// const userAnswers = ref([]);
 
-function fetchQuestions() {
-  axios
-    .get("https://quizapi.io/api/v1/questions", {
-      headers: {
-        "X-Api-Key": apiKey,
-      },
-      params: {
-        difficulty: selectedDiff.value,
-        category: selectedCategory.value,
-        limit: 3,
-      },
-    })
-    .then((response) => {
-      questions.value = response.data;
-    })
-    .catch((error) => {
-      console.error(error);
-    });
-  userAnswers.value = [];
-  answersChekin.value = [];
-  questionToShow.value = 0;
-}
-function fetchCategories() {
-  axios
-    .get("https://quizapi.io/api/v1/categories ", {
-      headers: {
-        "X-Api-Key": apiKey,
-      },
-    })
-    .then((response) => {
-      categories.value = response.data;
-    })
-    .catch((error) => {
-      console.error(error);
-    });
-}
-
-function checkAnswers() {
-  let results = [];
-  questions.value.forEach((question) => {
-    const userAnswer = userAnswers.value.find(
-      (answer) => answer.questionID == question.id
-    );
-    const trueAnswers = Object.entries(question.correct_answers)
-      .filter((entrie) => entrie[1] == "true")
-      .map((entrie) => entrie[0].substring(0, 8));
-    if (userAnswer) {
-      const userAnswerArray = userAnswer.answers.sort();
-      if (JSON.stringify(trueAnswers) == JSON.stringify(userAnswerArray)) {
-        results.push({
-          id: question.id,
-          isCorrect: true,
-          userAnswers: userAnswerArray,
-          correctAnswer: trueAnswers,
-        });
-      } else {
-        results.push({
-          id: question.id,
-          isCorrect: false,
-          userAnswers: userAnswerArray,
-          correctAnswer: trueAnswers,
-        });
-      }
-    } else {
-      results.push({
-        id: question.id,
-        isCorrect: false,
-        userAnswers: undefined,
-        correctAnswer: trueAnswers,
-      });
-    }
-  });
-  answersChekin.value = results.map((result) => {
-    return {
-      ...result,
-      question: questions.value.find((question) => question.id == result.id),
-    };
-  });
-  console.log(answersChekin.value);
-}
+const { fetchCategories, fetchQuestions, checkAnswers } = store;
 
 onMounted(() => {
   fetchCategories();
@@ -130,7 +29,7 @@ onMounted(() => {
     <h1 class="text-center">Lara-Quizz</h1>
     <div class="pannel card rounded">
       <div class="card-body">
-        <h3 class="text-center">Difficulty</h3>
+        <h3 class="text-center text-secondary">Difficulty</h3>
 
         <div class="diffucly d-flex justify-content-around my-5">
           <input
@@ -161,7 +60,7 @@ onMounted(() => {
           />
           <label for="hard" class="btn btn-outline-danger">Hard</label>
         </div>
-        <h3 class="text-center">Category</h3>
+        <h3 class="text-center text-secondary">Category</h3>
         <div class="row d-flex justify-content-center">
           <div class="col-6">
             <div class="category">
@@ -192,53 +91,60 @@ onMounted(() => {
         </div>
       </div>
     </div>
-    <div
-      class="questions"
-      v-if="questionToShow >= 0 && !answersChekin.length"
-    >
-      <Question
-        :key="questions[questionToShow].id"
-        :question="questions[questionToShow]"
-        @userAnswer="updateUserAnswers"
-      />
-      <div class="row d-flex justify-content-end">
-        <div class="col-9">
-          <div
-            class="progress"
-            role="progressbar"
-            aria-label="Animated striped example"
-            aria-valuenow="75"
-            aria-valuemin="0"
-            aria-valuemax="100"
-          >
-            <div
-              class="progress-bar progress-bar-striped progress-bar-animated"
-              :style="{
-                width: `${((questionToShow + 1) / questions.length) * 100}%`,
-              }"
-            ></div>
+    <div class="questions" v-if="questionToShow >= 0 && !answersChekin.length">
+      <div class="row d-flex justify-content-center align-items-center">
+        <div class="col-md-10 col-sm-12">
+          <Question
+            :key="questions[questionToShow].id"
+            :question="questions[questionToShow]"
+          />
+          <div class="row d-flex">
+            <div class="col-9">
+              <div
+                class="progress"
+                role="progressbar"
+                aria-label="Animated striped example"
+                aria-valuenow="75"
+                aria-valuemin="0"
+                aria-valuemax="100"
+              >
+                <div
+                  class="progress-bar progress-bar-striped progress-bar-animated"
+                  :style="{
+                    width: `${
+                      ((questionToShow + 1) / questions.length) * 100
+                    }%`,
+                  }"
+                ></div>
+              </div>
+              <div class="text-center">
+                {{ questionToShow + 1 }}/{{ questions.length }}
+              </div>
+            </div>
+            <div class="col-3">
+              <button
+                @click="
+                  questionToShow +=
+                    questionToShow == questions.length - 1 ? 0 : 1
+                "
+                class="btn btn-info"
+              >
+                Next
+              </button>
+            </div>
           </div>
-          <div class="text-center">
-            {{ questionToShow + 1 }}/{{ questions.length }}
-          </div>
-        </div>
-        <div class="col-3">
-          <button
-            @click="
-              questionToShow += questionToShow == questions.length - 1 ? 0 : 1
-            "
-            class="btn btn-info"
-          >
-            Next
-          </button>
         </div>
       </div>
     </div>
     <div class="results" v-if="answersChekin.length">
-      <Checking :checked-answers="answersChekin" />
+      <Checking />
     </div>
   </div>
 </template>
 
 <style scoped>
+.diffucly {
+  width: 50%;
+  margin: 0 auto;
+}
 </style>
