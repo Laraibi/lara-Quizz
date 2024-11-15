@@ -82,6 +82,7 @@ export const useQuizzStore = defineStore('quizz', () => {
   }
 
   function checkAnswers() {
+    console.log('checkAnswers() launched ')
     let results = [];
     questions.value.forEach((question) => {
       const userAnswer = userAnswers.value.find(

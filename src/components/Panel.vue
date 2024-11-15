@@ -52,9 +52,6 @@
         <button class="col-3 btn btn-success me-5" @click="fetchQuestions">
           start
         </button>
-        <button class="col-3 btn btn-success" @click="checkAnswers">
-          check answers
-        </button>
       </div>
     </div>
   </div>
@@ -66,8 +63,7 @@ import { useQuizzStore } from "@/stores/quizz";
 
 const store = useQuizzStore();
 const { categories, selectedCategory, selectedDiff } = storeToRefs(store);
-const { fetchQuestions, checkAnswers } = store;
-
+const { fetchQuestions } = store;
 </script>
 
 <style>
