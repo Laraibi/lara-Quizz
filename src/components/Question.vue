@@ -1,6 +1,6 @@
 
 <script setup>
-import { defineProps,ref } from "vue";
+import { defineProps, onMounted, ref, computed } from "vue";
 import { useQuizzStore } from "@/stores/quizz";
 import { storeToRefs } from "pinia";
 const store = useQuizzStore();
@@ -9,7 +9,7 @@ const { questionToShow, questions } = storeToRefs(store);
 const props = defineProps(["question"]);
 
 const hasMakedChoice = ref(false);
-
+const timeLeft = ref("");
 function updateUserAnswer(index, isChecked) {
   updateUserAnswers(props.question.id, index, isChecked);
   hasMakedChoice.value = true;
@@ -20,10 +20,49 @@ const handleNext = () => {
     checkAnswers();
   }
 };
+
+// Function to update the countdown timer
+const startCountdown = () => {
+  let timeRemaining = 25;
+  const timerInterval = setInterval(() => {
+    // Decrement the timer
+    timeRemaining--;
+
+    // Display the remaining time in minutes and seconds
+    const minutes = Math.floor(timeRemaining / 60);
+    const seconds = timeRemaining % 60;
+    timeLeft.value = `${minutes}:${seconds < 10 ? "0" + seconds : seconds}`;
+
+    // When the timer reaches 0, clear the interval and perform the action
+    if (timeRemaining <= 0) {
+      clearInterval(timerInterval);
+      handleNext();
+    }
+  }, 1000); // Update every second
+};
+
+// Start the countdown
+onMounted(() => startCountdown());
+const timeColor = computed(() => {
+  const sec = parseInt(timeLeft.value.split(":")[1]);
+  if (sec < 10) {
+    return "text-danger";
+  } else if (sec < 20) {
+    return "text-warning";
+  }
+  return "";
+});
 </script>
 
 <template>
-  <h2>{{ props.question.question }}</h2>
+  <div class="row">
+    <div class="col-10">
+      <h2>{{ props.question.question }}</h2>
+    </div>
+    <div class="col-2" :class="timeColor">
+      {{ timeLeft }}
+    </div>
+  </div>
   <ul>
     <div v-for="(answer, index) in question.answers" :key="index">
       <li v-if="answer != null">
