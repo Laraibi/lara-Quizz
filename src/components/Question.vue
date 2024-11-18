@@ -23,7 +23,7 @@ const handleNext = () => {
 
 // Function to update the countdown timer
 const startCountdown = () => {
-  let timeRemaining = 25;
+  let timeRemaining = 30;
   const timerInterval = setInterval(() => {
     // Decrement the timer
     timeRemaining--;

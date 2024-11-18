@@ -53,7 +53,7 @@ export const useQuizzStore = defineStore('quizz', () => {
         params: {
           difficulty: selectedDiff.value,
           category: selectedCategory.value,
-          limit: 3,
+          // limit: 3,
         },
       })
       .then((response) => {
