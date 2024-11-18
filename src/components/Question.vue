@@ -1,16 +1,18 @@
 
 <script setup>
-import { defineProps } from "vue";
+import { defineProps,ref } from "vue";
 import { useQuizzStore } from "@/stores/quizz";
 import { storeToRefs } from "pinia";
 const store = useQuizzStore();
-
 const { updateUserAnswers, checkAnswers } = store;
 const { questionToShow, questions } = storeToRefs(store);
 const props = defineProps(["question"]);
 
+const hasMakedChoice = ref(false);
+
 function updateUserAnswer(index, isChecked) {
   updateUserAnswers(props.question.id, index, isChecked);
+  hasMakedChoice.value = true;
 }
 const handleNext = () => {
   questionToShow.value++;
@@ -68,7 +70,13 @@ const handleNext = () => {
         </div>
       </div>
       <div class="col-3">
-        <button @click="handleNext" class="btn btn-info">Next</button>
+        <button
+          @click="handleNext"
+          class="btn btn-info w-100"
+          :disabled="!hasMakedChoice"
+        >
+          Next
+        </button>
       </div>
     </div>
   </div>
