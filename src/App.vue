@@ -8,13 +8,8 @@ import { useQuizzStore } from "@/stores/quizz";
 
 const store = useQuizzStore();
 const { questions, questionToShow, answersChekin } = storeToRefs(store);
-const { fetchCategories, checkAnswers } = store;
-const handleNext = () => {
-  questionToShow.value++;
-  if (questionToShow.value == questions.value.length) {
-    checkAnswers();
-  }
-};
+const { fetchCategories } = store;
+
 onMounted(() => {
   fetchCategories();
 });
@@ -30,34 +25,7 @@ onMounted(() => {
           <Question
             :key="questions[questionToShow].id"
             :question="questions[questionToShow]"
-          />
-          <div class="row d-flex">
-            <div class="col-9">
-              <div
-                class="progress"
-                role="progressbar"
-                aria-label="Animated striped example"
-                aria-valuenow="75"
-                aria-valuemin="0"
-                aria-valuemax="100"
-              >
-                <div
-                  class="progress-bar progress-bar-striped progress-bar-animated"
-                  :style="{
-                    width: `${
-                      ((questionToShow + 1) / questions.length) * 100
-                    }%`,
-                  }"
-                ></div>
-              </div>
-              <div class="text-center">
-                {{ questionToShow + 1 }}/{{ questions.length }}
-              </div>
-            </div>
-            <div class="col-3">
-              <button @click="handleNext" class="btn btn-info">Next</button>
-            </div>
-          </div>
+          />          
         </div>
       </div>
     </div>
