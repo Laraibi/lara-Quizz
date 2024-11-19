@@ -1,4 +1,3 @@
-
 <script setup>
 import { defineProps, onMounted, ref, computed } from "vue";
 import { useQuizzStore } from "@/stores/quizz";
@@ -15,6 +14,7 @@ function updateUserAnswer(index, isChecked) {
   hasMakedChoice.value = true;
 }
 const handleNext = () => {
+  clearInterval(timerInterval.value);
   questionToShow.value++;
   if (questionToShow.value == questions.value.length) {
     checkAnswers();
@@ -22,9 +22,11 @@ const handleNext = () => {
 };
 
 // Function to update the countdown timer
+
+const timerInterval = ref(null);
 const startCountdown = () => {
   let timeRemaining = 30;
-  const timerInterval = setInterval(() => {
+  timerInterval.value = setInterval(() => {
     // Decrement the timer
     timeRemaining--;
 
@@ -35,7 +37,7 @@ const startCountdown = () => {
 
     // When the timer reaches 0, clear the interval and perform the action
     if (timeRemaining <= 0) {
-      clearInterval(timerInterval);
+      // clearInterval(timerInterval.value);
       handleNext();
     }
   }, 1000); // Update every second
